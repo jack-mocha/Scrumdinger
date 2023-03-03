@@ -25,6 +25,20 @@ class ScrumStore: ObservableObject {
         }
     }
     
+    @discardableResult
+    static func save(scrums: [DailyScrum]) async throws -> Int {
+        try await withCheckedThrowingContinuation { continuation in
+            save(scrums: scrums) { result in
+                switch result {
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                case .success(let scrumsSaved):
+                    continuation.resume(returning: scrumsSaved)
+                }
+            }
+        }
+    }
+    
     static func load(completion: @escaping (Result<[DailyScrum], Error>)->Void) {
         //Dispatch queues are first in, first out (FIFO) queues to which your application can submit tasks. Background tasks have the lowest priority of all tasks.
         DispatchQueue.global(qos: .background).async {
