@@ -11,6 +11,19 @@ class ScrumStore: ObservableObject {
                                        create: false)
             .appendingPathComponent("scrums.data") //return the URL of a file named scrums.data.
     }
+
+    static func load() async throws -> [DailyScrum] {
+        try await withCheckedThrowingContinuation { continuation in
+            load { result in
+                switch result {
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                case .success(let scrums):
+                    continuation.resume(returning: scrums)
+                }
+            }
+        }
+    }
     
     static func load(completion: @escaping (Result<[DailyScrum], Error>)->Void) {
         //Dispatch queues are first in, first out (FIFO) queues to which your application can submit tasks. Background tasks have the lowest priority of all tasks.
